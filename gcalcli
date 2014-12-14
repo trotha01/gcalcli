@@ -547,7 +547,8 @@ class gcalcli:
                  useCache=True,
                  configFolder=None,
                  client_id=__API_CLIENT_ID__,
-                 client_secret=__API_CLIENT_SECRET__):
+                 client_secret=__API_CLIENT_SECRET__,
+                 resultLimit=None):
 
         self.military = military
         self.ignoreStarted = ignoreStarted
@@ -577,6 +578,8 @@ class gcalcli:
 
         self.client_id = client_id
         self.client_secret = client_secret
+
+        self.resultLimit = resultLimit
 
         self._GetCached()
 
@@ -1502,6 +1505,8 @@ class gcalcli:
                      q=searchText if searchText else None,
                      singleEvents=True)
 
+            print work
+
             events = work.execute()
             queue.put((cal, events))
 
@@ -1582,6 +1587,9 @@ class gcalcli:
                 return
 
         eventList = self._SearchForCalEvents(start, end, None)
+
+        if self.resultLimit:
+            eventList = eventList[:self.resultLimit]
 
         if self.tsv:
             self._tsv(start, eventList)
@@ -2053,6 +2061,8 @@ gflags.DEFINE_bool("monday", False, "Start the week on Monday")
 gflags.DEFINE_bool("color", True, "Enable/Disable all color output")
 gflags.DEFINE_bool("lineart", True, "Enable/Disable line art")
 gflags.DEFINE_bool("conky", False, "Use Conky color codes")
+gflags.DEFINE_integer("limit", None, "How many events to report",
+                      lower_bound=1)
 
 gflags.DEFINE_string("color_owner", "cyan", "Color for owned calendars")
 gflags.DEFINE_string("color_writer", "green", "Color for writable calendars")
@@ -2263,7 +2273,8 @@ def BowChickaWowWow():
                    useCache=FLAGS.cache,
                    configFolder=FLAGS.configFolder,
                    client_id=FLAGS.client_id,
-                   client_secret=FLAGS.client_secret
+                   client_secret=FLAGS.client_secret,
+                   resultLimit=FLAGS.limit
                    )
 
     if args[0] == 'list':
