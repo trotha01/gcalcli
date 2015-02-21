@@ -1816,11 +1816,9 @@ class gcalcli:
         if message == '':
             return
 
-        cmd = shlex.split(command)
 
-        for i, a in zip(xrange(len(cmd)), cmd):
-            if a == '%s':
-                cmd[i] = message
+        command = command.replace("%s", message)
+        cmd = shlex.split(command)
 
         pid = os.fork()
         if not pid:
